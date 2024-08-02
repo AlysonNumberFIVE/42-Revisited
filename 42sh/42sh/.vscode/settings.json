@@ -1,0 +1,24 @@
+{
+    "files.associations": {
+        "shell.h": "c",
+        "libft.h": "c",
+        "stdio.h": "c",
+        "typeinfo": "c",
+        "chrono": "c",
+        "variant": "c",
+        "lib.h": "c",
+        "string": "c",
+        "iosfwd": "c",
+        "array": "c",
+        "string_view": "c",
+        "vector": "c",
+        "stdlib.h": "c",
+        "string.h": "c",
+        "termcaps.h": "c",
+        "termcap.h": "c",
+        "ioctl.h": "c",
+        "dirent.h": "c",
+        "unistd.h": "c",
+        "fcntl.h": "c"
+    }
+}

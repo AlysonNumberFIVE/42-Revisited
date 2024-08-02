@@ -1,0 +1,1 @@
+gcc -o termcap keypress.c termcaps.c -ltermcap
