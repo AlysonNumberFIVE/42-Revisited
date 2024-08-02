@@ -47,7 +47,6 @@ t_input_status *change_prompt(char *current_prompt, char *default_prompt)
     t_stack *traverse;
     char *prompt;
     char *temp;
-    t_input_status *status;
     char *shell_prompt_stack;
 
     shell_prompt_stack = NULL;

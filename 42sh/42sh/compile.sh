@@ -1,3 +1,3 @@
 
 
-gcc src/*.c ../alylibc/lib.a
+gcc -Wall -Wextra -o 42sh src/*.c ../alylibc/lib.a

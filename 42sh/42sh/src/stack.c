@@ -21,18 +21,6 @@ t_stack *new_data(void *data, size_t size)
     return stack;
 }
 
- void static add_data(t_stack **stack, void *data, size_t data_size)
-{
-    t_stack *traverse;
-
-    traverse = *stack;
-    while (traverse->next) 
-        traverse = traverse->next;
-
-    traverse->next = new_data(data, data_size);
-    traverse->next->prev = traverse;
-}
-
 t_stack *pop(t_stack **stack) 
 {
     t_stack *traverse; 

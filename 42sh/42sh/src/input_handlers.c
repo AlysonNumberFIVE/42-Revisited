@@ -101,7 +101,6 @@ void    handle_shell_input(t_token *tokens)
 {
     t_token *trav;
     t_stack *item;
-    t_input_status *status;
     char *type;
 
     trav = tokens;

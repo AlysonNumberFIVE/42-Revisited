@@ -4,7 +4,7 @@
 
 t_env 	*init_environ(void) 
 {	
-	char **environ;
+	extern char **environ;
 	char **env_key_value;
 	t_env *local_env;
 	size_t index;

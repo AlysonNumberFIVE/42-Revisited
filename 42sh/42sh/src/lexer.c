@@ -42,24 +42,10 @@ static void double_token(char *buffer, size_t *counter, t_token **tokens, char *
         }
         i++;
     }
-    return push_token(tokens, new_token, default_type);
+    return push_token(tokens, default_val, default_type);
 }
 
-static void string_token(char *buffer, size_t *counter, t_token **tokens, char quote, char *quote_type)
-{
-    char *token_name;
-    size_t i;
 
-    token_name = NULL;
-    i = *counter;
-    while (buffer[i] && buffer[i] != quote)
-    {
-        token_name = charpush(token_name, buffer[i]);
-        i++;
-    }
-    *counter = i;
-    return push_token(tokens, token_name, quote_type);
-}
 
 static void number_token(char *buffer, size_t *counter, t_token **tokens)
 {
@@ -196,9 +182,8 @@ void        clear_tokens(t_token *token)
 
 t_token *lexer(char *input_buffer) 
 {
-    int index;
+    size_t index;
     size_t input_buffer_length;
-    char *parsed_string;
     t_token *tokens;
 
     index = 0;
