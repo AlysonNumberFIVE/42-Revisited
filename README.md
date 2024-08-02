@@ -1,4 +1,5 @@
-# 42 Revisited (a list of my favourite projects from 42 I'm redoing for fun and profit)
+# 42 Revisited 
+## a list of my favourite projects from 42 I'm redoing for fun and profit
 
 This repo is going to be for my favourite C projects from 42 that I could've done a lot better had I been a better engineer that I found the most fun and educational. I'm also worknig on getting myself skilled in C, assembly and Verilog again.
 
