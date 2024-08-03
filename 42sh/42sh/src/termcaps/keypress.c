@@ -4,7 +4,7 @@
 char buffer[4096];
 int history_depth = 0;
 
-static char directions(void)
+static char directions(bool *is_command_history)
 {
     char token_sequence[3];
     size_t read_bytes;
@@ -28,27 +28,44 @@ static char directions(void)
             // TODO: Make an env variable for HISTFILESIZE to
             // determine upper limit of the history file.
             history_depth++;
+            *is_command_history = true;
         }
         else if (token_sequence[1] == ARROW_DOWN)
         {
             history_depth--;
             if (history_depth < 0)
                 history_depth = 0;
+            *is_command_history = true;
         }
     }
     return 0;
+}
+
+
+void    handle_newline(t_termcap **terminal_id)
+{
+    t_termcap *local_terminal_id;
+
+    local_terminal_id = *terminal_id;
+    printf("\n");
+    local_terminal_id->cursor_position = 0;
+    local_terminal_id->cursor_row++;
+    move_cursor(local_terminal_id, 0, local_terminal_id->cursor_row);
+    printf("%s", local_terminal_id->prompt);
+    fflush(stdout);
 }
 
 void handle_keypress(t_termcap *terminal_id)
 {
     ssize_t read_bytes;
     char c;
+    bool is_command_history;
     int cursor_adjuster;
 
+    is_command_history = false;
     cursor_adjuster = 0;
     c = 0;
     read_bytes = 0;
-    
     while (42)
     {
         read_bytes = read(STDIN_FILENO, &c, 1);
@@ -62,17 +79,21 @@ void handle_keypress(t_termcap *terminal_id)
         }
         else if (c == NEWLINE)
         {
-            printf("\n");
-            terminal_id->cursor_position = 0;
-            terminal_id->cursor_row++;
-            move_cursor(terminal_id, 0, terminal_id->cursor_row);
-            printf("%s", terminal_id->prompt);
-            fflush(stdout);
+            handle_newline(&terminal_id);
             break ;
         }
         else if (c == ESC_SEQ)
         { 
-            cursor_adjuster = directions();
+            cursor_adjuster = directions(&is_command_history);
+
+            if (is_command_history == true)
+            {
+                // History goes here
+                printf("command buffer; %d\n", history_depth);
+                fflush(stdout);
+                is_command_history = false;
+                break ;
+            }
             if (cursor_adjuster == 0)
                 continue ;
 

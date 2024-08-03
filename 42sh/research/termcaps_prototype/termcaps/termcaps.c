@@ -47,9 +47,12 @@ t_termcap *init_termcaps(void)
     terminal_id = (t_termcap *)malloc(sizeof(t_termcap));
     terminal_id->cm = tgetstr("cm", NULL);
     terminal_id->ce = tgetstr("ce", NULL);
+
+    // TODO: This will be taken from the HISTFILE shell env.
+    terminal_id->history_file = strdup(".hidden_history_file_TEST");
     terminal_id->cursor_position = 0;
     terminal_id->cursor_row = 0;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    ioctl(STDOUT_FILENO, TIOCGWINSZ,  &w);
     terminal_id->screen_width = w.ws_col;
     return terminal_id;
 }

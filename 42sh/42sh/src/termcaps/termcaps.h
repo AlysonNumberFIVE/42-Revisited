@@ -15,6 +15,8 @@ typedef struct s_termcap_manager
     int cursor_column;
     int screen_width;
 
+    char *history_file;
+
     char prompt[128];
     int prompt_length;
 }   t_termcap;

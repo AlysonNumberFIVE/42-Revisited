@@ -35,19 +35,32 @@ t_termcap *init_termcaps(void)
 {
     t_termcap *terminal_id;
     struct winsize w;
+    char term_buffer[READ_BUFF_SIZE];
 
     terminal_id = NULL;
-    char term_buffer[READ_BUFF_SIZE];
-    // TODO: Make 
+
+    // TODO: Make  
     char *terminal_type = getenv("TERM");
 
     if (tgetent(term_buffer, terminal_type) < 0)
         return NULL;
     
     terminal_id = (t_termcap *)malloc(sizeof(t_termcap));
+
+    // TODO: this hidden file must be stored in HISTFILE
+    terminal_id->history_fd = open(".hidden_history_file_TEST", O_RDWR);
+    if (terminal_id->history_fd  == -1)
+    {
+        free(terminal_id);
+        exit(1);
+    }
+
+    // TODO: Add this to HISTFILE
+    terminal_id->history_file_name = strdup(".hidden_history_file_TEST");
     terminal_id->cm = tgetstr("cm", NULL);
     terminal_id->ce = tgetstr("ce", NULL);
     terminal_id->cursor_position = 0;
+
     terminal_id->cursor_row = 0;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     terminal_id->screen_width = w.ws_col;

@@ -19,25 +19,31 @@
 #define PATH_DELIM '/'
 
 
-typedef struct s_termcap_manager 
+typedef struct  s_termcap_manager 
 {
-    char *cm;
-    char *ce;
-    int cursor_position;
-    int cursor_row;
-    int cursor_column;
-    int screen_width;
+    char    *cm;
+    char    *ce;
+    int     cursor_position;
+    int     cursor_row;
+    int     cursor_column;
+    int     screen_width;
+    int     history_depth;
 
-    char prompt[PROMPT_LENGTH];
-    int prompt_length;
-}   t_termcap;
+    int     history_fd;
 
-// Maybe to avoid global variable management of up/down?
-typedef struct s_direction_handler 
-{
-    int left_or_right;
-    int up_or_down;
-}   t_direction;
+    // TODO: Keep this in the HISTFILE environment variable.
+    char    *history_file_name;
+    // TODO: Keep this in the HISTIFILESIZE environment variable.
+    size_t  history_file_size;
+
+    char    **history; 
+
+
+    char    prompt[PROMPT_LENGTH];
+    int     prompt_length;
+}                  t_termcap;
+
+
 
 
 void    refresh_line(t_termcap *terminal);
