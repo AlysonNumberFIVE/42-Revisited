@@ -45,7 +45,7 @@ typedef struct  s_termcap_manager
 
 
 
-
+// Terminal UI
 void    refresh_line(t_termcap *terminal);
 void    enable_raw_mode(void);
 t_termcap *init_termcaps(void);
@@ -55,5 +55,8 @@ void    blink_timer(void);
 void    toggle_cursor_blink(int signum);
 void    clear_screen(void);
 void    set_prompt(t_termcap *terminal, const char *new_prompt);
+
+// Terminal history
+char       **adjust_history_lookback(t_termcap *terminal, char *new_command);
 
 #endif 

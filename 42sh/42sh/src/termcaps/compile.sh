@@ -1,1 +1,1 @@
-gcc -Wall -Wextra -o termcap keypress.c termcaps.c -ltermcap
+gcc -Wall -Wextra -o termcap keypress.c termcaps.c ../../../alylibc/lib.a -ltermcap 

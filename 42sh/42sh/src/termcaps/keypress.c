@@ -2,9 +2,9 @@
 #include "../../lib/termcaps.h"
 
 char buffer[4096];
-int history_depth = 0;
+ssize_t history_depth = 0;
 
-static char directions(bool *is_command_history)
+static char directions(bool *is_command_history, size_t history_size)
 {
     char token_sequence[3];
     size_t read_bytes;
@@ -28,6 +28,8 @@ static char directions(bool *is_command_history)
             // TODO: Make an env variable for HISTFILESIZE to
             // determine upper limit of the history file.
             history_depth++;
+            if (history_depth >= history_size - 1)
+                history_depth = history_size - 1;
             *is_command_history = true;
         }
         else if (token_sequence[1] == ARROW_DOWN)
@@ -55,12 +57,20 @@ void    handle_newline(t_termcap **terminal_id)
     fflush(stdout);
 }
 
+char *history_lookup(t_termcap *terminal_id)
+{     
+    char *newstr;
+    newstr = strdup(terminal_id->history[history_depth]);  
+    return newstr;
+}
+
 void handle_keypress(t_termcap *terminal_id)
 {
     ssize_t read_bytes;
     char c;
     bool is_command_history;
     int cursor_adjuster;
+    char *tmp;
 
     is_command_history = false;
     cursor_adjuster = 0;
@@ -84,13 +94,17 @@ void handle_keypress(t_termcap *terminal_id)
         }
         else if (c == ESC_SEQ)
         { 
-            cursor_adjuster = directions(&is_command_history);
+            cursor_adjuster = directions(&is_command_history, terminal_id->history_file_size);
 
             if (is_command_history == true)
             {
-                // History goes here
-                printf("command buffer; %d\n", history_depth);
+                tmp = history_lookup(terminal_id);
+                memset(buffer, 0, READ_BUFF_SIZE);
+                memmove(buffer, tmp, strlen(tmp));
+                clear_line(terminal_id);
+                printf("%s", buffer);
                 fflush(stdout);
+                free(tmp);
                 is_command_history = false;
                 break ;
             }

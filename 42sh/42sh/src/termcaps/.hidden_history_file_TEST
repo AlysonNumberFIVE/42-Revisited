@@ -1,0 +1,7 @@
+cd tests
+ls -a
+ls 42
+env
+echo $HELLO
+setenv HELLO=WORLD
+echo $HELLO
