@@ -31,41 +31,6 @@ void enable_raw_mode(void)
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
-static char    **unpack_history_file(char *filename, size_t lookback_limit)
-{
-    ssize_t read_bytes; 
-    size_t line_limit;
-    char **lines;
-    char **file_content;
-    char *content;
-
-    line_limit = 0;
-    file_content = NULL;
-    lines = NULL;
-    content = read_file(filename, O_RDWR, &read_bytes);
-    if (read_bytes == 0 || content == NULL)
-        return NULL;
-
-    lines = split(content, '\n');
-    if (lines == NULL)
-        return NULL;
-
-    line_limit = arraylen(lines);
-    if (lookback_limit >= line_limit)
-        return lines;
-
-    line_limit--;
-    lookback_limit--;
-    while (lookback_limit > -1)
-    {
-        file_content = arraypush(file_content, lines[line_limit]);
-        line_limit--;
-        lookback_limit--;
-    }
-
-    return file_content;
-}
-
 t_termcap *init_termcaps(void) 
 {
     t_termcap *terminal_id;
@@ -90,14 +55,6 @@ t_termcap *init_termcaps(void)
         exit(1);
     }
 
-    // TODO: Add this to HISTFILE
-    terminal_id->history_file_name = strdup(".hidden_history_file_TEST");
-
-    // TODO: Add this to HISTFILESIZE
-    terminal_id->history_file_size = 7; 
-
-    terminal_id->history = unpack_history_file(terminal_id->history_file_name,
-       terminal_id->history_file_size);
 
     terminal_id->cm = tgetstr("cm", NULL);
     terminal_id->ce = tgetstr("ce", NULL);

@@ -31,18 +31,9 @@ typedef struct  s_termcap_manager
 
     int     history_fd;
 
-    // TODO: Keep this in the HISTFILE environment variable.
-    char    *history_file_name;
-    // TODO: Keep this in the HISTIFILESIZE environment variable.
-    size_t  history_file_size;
-
-    char    **history; 
-
-
     char    prompt[PROMPT_LENGTH];
     int     prompt_length;
 }                  t_termcap;
-
 
 
 // Terminal UI
@@ -56,7 +47,22 @@ void    toggle_cursor_blink(int signum);
 void    clear_screen(void);
 void    set_prompt(t_termcap *terminal, const char *new_prompt);
 
+
+typedef struct s_history_manager 
+{
+    char buffer[READ_BUFF_SIZE]; 
+    size_t position;
+
+    struct s_history_manager *next;
+    struct s_history_manager *prev;
+
+}   t_history;
+
 // Terminal history
-char       **adjust_history_lookback(t_termcap *terminal, char *new_command);
+void        navigate_up(t_history **history);
+void        navigate_down(t_history **history);
+void        push_history(t_history **history, char *record);
+void        print_history(t_history *history);
+
 
 #endif 

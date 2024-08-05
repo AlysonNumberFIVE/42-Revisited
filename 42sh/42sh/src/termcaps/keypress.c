@@ -2,9 +2,9 @@
 #include "../../lib/termcaps.h"
 
 char buffer[4096];
-ssize_t history_depth = 0;
+t_history *history;
 
-static char directions(bool *is_command_history, size_t history_size)
+static char directions(bool *is_command_history)
 {
     char token_sequence[3];
     size_t read_bytes;
@@ -27,17 +27,9 @@ static char directions(bool *is_command_history, size_t history_size)
         {
             // TODO: Make an env variable for HISTFILESIZE to
             // determine upper limit of the history file.
-            history_depth++;
-            if (history_depth >= history_size - 1)
-                history_depth = history_size - 1;
-            *is_command_history = true;
         }
         else if (token_sequence[1] == ARROW_DOWN)
         {
-            history_depth--;
-            if (history_depth < 0)
-                history_depth = 0;
-            *is_command_history = true;
         }
     }
     return 0;
@@ -57,14 +49,8 @@ void    handle_newline(t_termcap **terminal_id)
     fflush(stdout);
 }
 
-char *history_lookup(t_termcap *terminal_id)
-{     
-    char *newstr;
-    newstr = strdup(terminal_id->history[history_depth]);  
-    return newstr;
-}
 
-void handle_keypress(t_termcap *terminal_id)
+int handle_keypress(t_termcap *terminal_id)
 {
     ssize_t read_bytes;
     char c;
@@ -80,34 +66,19 @@ void handle_keypress(t_termcap *terminal_id)
     {
         read_bytes = read(STDIN_FILENO, &c, 1);
         if (read_bytes == -1) 
-            return ;
+            return -1;
 
         if (c == CTRL_C)
-        {
             exit(1);
-            return  ;
-        }
+            
         else if (c == NEWLINE)
         {
             handle_newline(&terminal_id);
-            break ;
+            return 1 ;
         }
         else if (c == ESC_SEQ)
         { 
-            cursor_adjuster = directions(&is_command_history, terminal_id->history_file_size);
-
-            if (is_command_history == true)
-            {
-                tmp = history_lookup(terminal_id);
-                memset(buffer, 0, READ_BUFF_SIZE);
-                memmove(buffer, tmp, strlen(tmp));
-                clear_line(terminal_id);
-                printf("%s", buffer);
-                fflush(stdout);
-                free(tmp);
-                is_command_history = false;
-                break ;
-            }
+            cursor_adjuster = directions(&is_command_history);
             if (cursor_adjuster == 0)
                 continue ;
 
@@ -136,7 +107,7 @@ void handle_keypress(t_termcap *terminal_id)
         }
         refresh_line(terminal_id);
     }
-
+    return 0;
 }
 
 
@@ -159,10 +130,7 @@ void write_terminal_buffer(char buffer[], t_termcap *terminal)
             printf("\033[7m%c\033[m", buffer[terminal->cursor_position]);
             fflush(stdout);
         }
-        else
-        {
-           // write(1,(void*)&buffer[i], 1);
-        }
+
         i++;
     }
 }
@@ -180,21 +148,29 @@ void refresh_line(t_termcap *terminal)
 int main(void)
 {
     t_termcap *termcap_manager;
+    int new_data;
 
     enable_raw_mode();
     termcap_manager = init_termcaps();
-
+    history = init_history();
     set_prompt(termcap_manager, "42sh$>");
 
+    new_data = 0;
     clear_screen();
     while (1)
     {
         printf("%s", termcap_manager->prompt);
-        handle_keypress(termcap_manager);
+        new_data = handle_keypress(termcap_manager);
 
         move_cursor(termcap_manager, 0, termcap_manager->cursor_row);
-        memset(buffer, 0, sizeof(buffer));
-        termcap_manager->cursor_position = 0;
+        if (new_data == 1)
+        {  
+            memset(buffer, 0, sizeof(buffer));
+            termcap_manager->cursor_position = 0;
+        }
+        else 
+            termcap_manager->cursor_position = strlen(buffer);
+    
     }
     return 0;
 }
