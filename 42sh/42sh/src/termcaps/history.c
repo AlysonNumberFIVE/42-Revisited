@@ -12,7 +12,12 @@ static t_history  *new_history(char *record, int index)
 
     record_length = strnlen(record, READ_BUFF_SIZE - 1);   
     memset(history->buffer, 0, READ_BUFF_SIZE);
-    memmove(history->buffer, record, record_length);
+    memset(history->buffer_read_only, 0,READ_BUFF_SIZE);
+
+    memcpy(history->buffer, record, record_length);
+
+    memcpy(history->buffer_read_only, history->buffer, record_length);
+
     history->index_DEBUG = index;
     history->position = strlen(record);
     history->next = NULL;
@@ -49,19 +54,27 @@ void    push_history(t_history **history, char *record)
         add_history(history, record);
 }
 
-void    insert_history(t_history **history)
+void    insert_history(t_history **history, char *buffer, char *buffer_read_only)
 {
     t_history *traverse;
     t_history *new_data;
-
+    
     traverse = *history;
-    while (traverse->next)
-        traverse = traverse->next;
+    if ((*history)->next != NULL)
+    {
+        while (traverse->next)
+            traverse = traverse->next;
+
+        memcpy(traverse->buffer, buffer, strlen(buffer));
+        memset((*history)->buffer, 0, READ_BUFF_SIZE);
+        memcpy((*history)->buffer, buffer_read_only, strlen(buffer_read_only));
+    }
 
     new_data = new_history("", 0);
-    (*history)->next = new_data;
-    (*history)->next->prev = *history;
+    traverse->next = new_data;
+    traverse->next->prev = traverse;
     *history = new_data;
+    
 }   
 
 void    print_history(t_history *history, t_termcap *t)

@@ -4,6 +4,7 @@
 
 t_history *head_DEBUG;
 t_history *history;
+char buffer[READ_BUFF_SIZE];
 
 
 static char directions()
@@ -49,7 +50,12 @@ void    handle_newline(t_termcap **terminal_id)
     local_terminal_id = *terminal_id;
     if (local_terminal_id->cursor_position > 0)
     {
-        insert_history(&history);
+        // Read only must be a permanent record of what the buffer was the firs time
+        // it was written to preserver its data in memory.
+        if (strlen(history->buffer_read_only) == 0)
+            memcpy(history->buffer_read_only, history->buffer, strlen(history->buffer));
+        
+        insert_history(&history, history->buffer, history->buffer_read_only);
     }
 
     printf("\n");

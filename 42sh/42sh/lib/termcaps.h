@@ -51,6 +51,8 @@ void    set_prompt(t_termcap *terminal, const char *new_prompt);
 typedef struct s_history_manager 
 {
     char buffer[READ_BUFF_SIZE]; 
+
+    char buffer_read_only[READ_BUFF_SIZE];
     size_t position;
     int index_DEBUG;
 
@@ -65,6 +67,6 @@ void        navigate_down(t_history **history);
 void        push_history(t_history **history, char *record);
 void        print_history(t_history *history, t_termcap *t);
 t_history   *init_history(char *filename);
-void    insert_history(t_history **history);
+void        insert_history(t_history **history, char *buffer, char *buffer_read_only);
 void        goto_last(t_history **history);
 #endif 
