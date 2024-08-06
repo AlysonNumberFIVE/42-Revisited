@@ -172,6 +172,7 @@ int main(void)
 
     enable_raw_mode();
     termcap_manager = init_termcaps();
+    // Store history file in HISTFILESIZE 
     history = init_history(".hidden_history_file_TEST");
     head_DEBUG = history;
     goto_last(&history);
