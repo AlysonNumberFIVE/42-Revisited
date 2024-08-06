@@ -1,10 +1,12 @@
 
 #include "../../lib/termcaps.h"
 
-char buffer[4096];
+
+t_history *head_DEBUG;
 t_history *history;
 
-static char directions(bool *is_command_history)
+
+static char directions()
 {
     char token_sequence[3];
     size_t read_bytes;
@@ -27,9 +29,13 @@ static char directions(bool *is_command_history)
         {
             // TODO: Make an env variable for HISTFILESIZE to
             // determine upper limit of the history file.
+            navigate_up(&history);
+            return ARROW_UP;
         }
         else if (token_sequence[1] == ARROW_DOWN)
         {
+            navigate_down(&history);
+            return ARROW_DOWN;
         }
     }
     return 0;
@@ -41,6 +47,11 @@ void    handle_newline(t_termcap **terminal_id)
     t_termcap *local_terminal_id;
 
     local_terminal_id = *terminal_id;
+    if (local_terminal_id->cursor_position > 0)
+    {
+        insert_history(&history);
+    }
+
     printf("\n");
     local_terminal_id->cursor_position = 0;
     local_terminal_id->cursor_row++;
@@ -54,11 +65,8 @@ int handle_keypress(t_termcap *terminal_id)
 {
     ssize_t read_bytes;
     char c;
-    bool is_command_history;
     int cursor_adjuster;
-    char *tmp;
 
-    is_command_history = false;
     cursor_adjuster = 0;
     c = 0;
     read_bytes = 0;
@@ -78,30 +86,34 @@ int handle_keypress(t_termcap *terminal_id)
         }
         else if (c == ESC_SEQ)
         { 
-            cursor_adjuster = directions(&is_command_history);
+            cursor_adjuster = directions();
             if (cursor_adjuster == 0)
                 continue ;
-
+        
+            else if (cursor_adjuster == ARROW_DOWN || cursor_adjuster == ARROW_DOWN)
+                terminal_id->cursor_position = strlen(history->buffer) - 1;
+            
+        
             terminal_id->cursor_position += cursor_adjuster;
             if (terminal_id->cursor_position < 0)
                 terminal_id->cursor_position = 0;
-            else if ((size_t)terminal_id->cursor_position >= strlen(buffer))
-                terminal_id->cursor_position = strlen(buffer);
+            else if ((size_t)terminal_id->cursor_position >= strlen(history->buffer))
+                terminal_id->cursor_position = strlen(history->buffer);
         }
         else if (c == BACKSPACE)
         {
             if (terminal_id->cursor_position > 0)
             {
-                memmove(&buffer[terminal_id->cursor_position - 1], &buffer[terminal_id->cursor_position], strlen(buffer) - terminal_id->cursor_position + 1);
+                memmove(&history->buffer[terminal_id->cursor_position - 1], &history->buffer[terminal_id->cursor_position], strlen(history->buffer) - terminal_id->cursor_position + 1);
                 terminal_id->cursor_position--;
             }
         }
         else 
         {
-            if ((size_t)terminal_id->cursor_position <= strlen(buffer) && terminal_id->cursor_position > -1) 
+            if ((size_t)terminal_id->cursor_position <= strlen(history->buffer) && terminal_id->cursor_position > -1) 
             {
-                memmove(&buffer[terminal_id->cursor_position + 1], &buffer[terminal_id->cursor_position], strlen(buffer) - terminal_id->cursor_position);
-                buffer[terminal_id->cursor_position] = c;
+                memmove(&history->buffer[terminal_id->cursor_position + 1], &history->buffer[terminal_id->cursor_position], strlen(history->buffer) - terminal_id->cursor_position);
+                history->buffer[terminal_id->cursor_position] = c;
                 terminal_id->cursor_position++;
             }
         }
@@ -119,6 +131,8 @@ void write_terminal_buffer(char buffer[], t_termcap *terminal)
 
     len = strlen(buffer);
     i = 0;
+
+    fflush(stdout);
     while (i < len)
     {
         if (i == (size_t)terminal->cursor_position)
@@ -139,9 +153,9 @@ void refresh_line(t_termcap *terminal)
 {
     move_cursor(terminal, 0, terminal->cursor_row);
     clear_line(terminal);
-    printf("%s%s", terminal->prompt, buffer);
+    printf("%s%s", terminal->prompt, history->buffer);
 
-    write_terminal_buffer(buffer, terminal);
+    write_terminal_buffer(history->buffer, terminal);
     fflush(stdout);
 }
 
@@ -152,7 +166,9 @@ int main(void)
 
     enable_raw_mode();
     termcap_manager = init_termcaps();
-    history = init_history();
+    history = init_history(".hidden_history_file_TEST");
+    head_DEBUG = history;
+    goto_last(&history);
     set_prompt(termcap_manager, "42sh$>");
 
     new_data = 0;
@@ -165,11 +181,11 @@ int main(void)
         move_cursor(termcap_manager, 0, termcap_manager->cursor_row);
         if (new_data == 1)
         {  
-            memset(buffer, 0, sizeof(buffer));
+            memset(history->buffer, 0, sizeof(history->buffer));
             termcap_manager->cursor_position = 0;
         }
         else 
-            termcap_manager->cursor_position = strlen(buffer);
+            termcap_manager->cursor_position = strlen(history->buffer);
     
     }
     return 0;

@@ -1,7 +1,7 @@
 
 #include "../../lib/termcaps.h"
 
-static t_history  *new_history(char *record)
+static t_history  *new_history(char *record, int index)
 {
     t_history   *history;
     size_t      record_length;
@@ -13,7 +13,7 @@ static t_history  *new_history(char *record)
     record_length = strnlen(record, READ_BUFF_SIZE - 1);   
     memset(history->buffer, 0, READ_BUFF_SIZE);
     memmove(history->buffer, record, record_length);
-
+    history->index_DEBUG = index;
     history->position = strlen(record);
     history->next = NULL;
     history->prev = NULL; 
@@ -23,12 +23,18 @@ static t_history  *new_history(char *record)
 static void   add_history(t_history **history, char *record)
 {
     t_history *traverse; 
+    int index;
 
+    index = 0;
     traverse = *history;
     while (traverse->next)
+    {
+        traverse->index_DEBUG = index;
         traverse = traverse->next;
-
-    traverse->next = new_history(record);
+        index++;
+    }
+    index ++ ;
+    traverse->next = new_history(record, index);
     if (traverse->next == NULL)
         return ;
 
@@ -38,12 +44,27 @@ static void   add_history(t_history **history, char *record)
 void    push_history(t_history **history, char *record)
 {
     if (*history == NULL)
-        *history = new_history(record);
+        *history = new_history(record, 0);
     else 
         add_history(history, record);
 }
 
-void    print_history(t_history *history)
+void    insert_history(t_history **history)
+{
+    t_history *traverse;
+    t_history *new_data;
+
+    traverse = *history;
+    while (traverse->next)
+        traverse = traverse->next;
+
+    new_data = new_history("", 0);
+    (*history)->next = new_data;
+    (*history)->next->prev = *history;
+    *history = new_data;
+}   
+
+void    print_history(t_history *history, t_termcap *t)
 {
     t_history *traverse;
     int i;
@@ -53,8 +74,12 @@ void    print_history(t_history *history)
     while (traverse)
     {
         printf("==================\n");
+        clear_line(t);
         printf("history number: %d\n", i);
+        clear_line(t);
         printf("data: %s\n", traverse->buffer);
+        clear_line(t);
+
         printf("positoin %zu\n", traverse->position);
         traverse = traverse->next;
     }
@@ -106,7 +131,6 @@ t_history   *init_history(char *filename)
     }
     
     push_history(&records, "");
-    goto_last(records);
     return records;
 }
 

@@ -52,6 +52,7 @@ typedef struct s_history_manager
 {
     char buffer[READ_BUFF_SIZE]; 
     size_t position;
+    int index_DEBUG;
 
     struct s_history_manager *next;
     struct s_history_manager *prev;
@@ -62,7 +63,8 @@ typedef struct s_history_manager
 void        navigate_up(t_history **history);
 void        navigate_down(t_history **history);
 void        push_history(t_history **history, char *record);
-void        print_history(t_history *history);
-
-
+void        print_history(t_history *history, t_termcap *t);
+t_history   *init_history(char *filename);
+void    insert_history(t_history **history);
+void        goto_last(t_history **history);
 #endif 
