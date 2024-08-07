@@ -16,7 +16,10 @@
 #define ARROW_UP 'A'
 #define ARROW_DOWN 'B'
 #define BACKSPACE 127
+#define TAB 9
 #define PATH_DELIM '/'
+
+#define LOCAL_TOOLS_LENGTH 4
 
 
 typedef struct  s_termcap_manager 
@@ -61,6 +64,8 @@ typedef struct s_history_manager
 
 }   t_history;
 
+
+
 // Terminal history
 void        navigate_up(t_history **history);
 void        navigate_down(t_history **history);
@@ -69,4 +74,15 @@ void        print_history(t_history *history, t_termcap *t);
 t_history   *init_history(char *filename);
 void        insert_history(t_history **history, char *buffer, char *buffer_read_only);
 void        goto_last(t_history **history);
+
+
+
+typedef struct  s_autocomplete_manager
+{
+    char **files;
+
+} t_autocomplete;
+
+
+
 #endif 

@@ -15,7 +15,6 @@ static t_history  *new_history(char *record, int index)
     memset(history->buffer_read_only, 0,READ_BUFF_SIZE);
 
     memcpy(history->buffer, record, record_length);
-
     memcpy(history->buffer_read_only, history->buffer, record_length);
 
     history->index_DEBUG = index;

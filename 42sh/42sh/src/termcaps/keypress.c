@@ -85,6 +85,9 @@ int handle_keypress(t_termcap *terminal_id)
         if (c == CTRL_C)
             exit(1);
             
+        else if (c == TAB) 
+            continue ;
+        
         else if (c == NEWLINE)
         {
             handle_newline(&terminal_id);
@@ -172,7 +175,8 @@ int main(void)
 
     enable_raw_mode();
     termcap_manager = init_termcaps();
-    // Store history file in HISTFILESIZE 
+
+    // TODO: Store history file in HISTFILESIZE 
     history = init_history(".hidden_history_file_TEST");
     head_DEBUG = history;
     goto_last(&history);
@@ -183,6 +187,8 @@ int main(void)
     while (1)
     {
         printf("%s", termcap_manager->prompt);
+        fflush(stdout);
+
         new_data = handle_keypress(termcap_manager);
 
         move_cursor(termcap_manager, 0, termcap_manager->cursor_row);
@@ -193,7 +199,8 @@ int main(void)
         }
         else 
             termcap_manager->cursor_position = strlen(history->buffer);
-    
+
+        
     }
     return 0;
 }
