@@ -2,9 +2,10 @@
 #include "../../lib/termcaps.h"
 
 
-t_history *head_DEBUG;
+char **possible_commands = NULL;
+size_t command_list = 0;
+char *current = NULL;
 t_history *history;
-char buffer[READ_BUFF_SIZE];
 
 
 static char directions()
@@ -86,10 +87,37 @@ int handle_keypress(t_termcap *terminal_id)
             exit(1);
             
         else if (c == TAB) 
-            continue ;
-        
+        {   
+     
+            if (possible_commands != NULL && strcmp(history->buffer, current) == 0)
+            {
+                if (command_list >= arraylen(possible_commands) - 1)
+                    command_list = 0;
+                
+                memset(history->buffer, 0, strlen(history->buffer));
+                memcpy(history->buffer, possible_commands[command_list], strlen(possible_commands[command_list]));
+                terminal_id->cursor_position = strlen(history->buffer);
+                command_list++;
+                current = strdup(history->buffer);
+            }
+            else
+            {
+                clear_screen_downward();
+                // TODO: Move this string to PATH in the env
+                possible_commands = autocomplete(history->buffer, terminal_id, 
+                    "/Users/alysonngonyama/anaconda3/bin:/Users/alysonngonyama/anaconda3/condabin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+                );
+                current = strdup(history->buffer);
+            }
+        }
         else if (c == NEWLINE)
         {
+            if (possible_commands != NULL)
+            {
+                clear_next_line();
+                free2d(possible_commands);
+                possible_commands = NULL;
+            }
             handle_newline(&terminal_id);
             return 1 ;
         }
@@ -178,7 +206,6 @@ int main(void)
 
     // TODO: Store history file in HISTFILESIZE 
     history = init_history(".hidden_history_file_TEST");
-    head_DEBUG = history;
     goto_last(&history);
     set_prompt(termcap_manager, "42sh$>");
 
@@ -200,7 +227,7 @@ int main(void)
         else 
             termcap_manager->cursor_position = strlen(history->buffer);
 
-        
+
     }
     return 0;
 }

@@ -90,3 +90,36 @@ void    set_prompt(t_termcap *terminal, const char *new_prompt)
     terminal->prompt[sizeof(terminal->prompt) - 1] = '\0';
     terminal->prompt_length = strlen(terminal->prompt);
 }
+
+void clear_screen_downward(void) 
+{
+    char *cd = tgetstr("cd", NULL);
+    if (cd) {
+        tputs(cd, 1, putchar);
+    }
+}
+
+void clear_current_line(void) {
+    // Move cursor to the beginning of the line
+    char *cr = tgetstr("cr", NULL);
+    tputs(cr, 1, putchar);
+
+    // Clear from cursor to the end of the line
+    char *ce = tgetstr("ce", NULL);
+    tputs(ce, 1, putchar);
+}
+
+void clear_next_line(void) 
+{
+    char *sc = tgetstr("sc", NULL);
+    tputs(sc, 1, putchar);
+
+    char *do_ = tgetstr("do", NULL);
+    tputs(do_, 1, putchar);
+
+    char *ce = tgetstr("ce", NULL);
+    tputs(ce, 1, putchar);
+
+    char *rc = tgetstr("rc", NULL);
+    tputs(rc, 1, putchar);
+}

@@ -45,10 +45,12 @@ void    enable_raw_mode(void);
 t_termcap *init_termcaps(void);
 void    move_cursor(t_termcap *terminal, int column, int row);
 void    clear_line(t_termcap *terminal);
-void    blink_timer(void);
-void    toggle_cursor_blink(int signum);
 void    clear_screen(void);
+void    clear_next_line(void);
+void    clear_current_line(void);
+void    clear_screen_downward(void);
 void    set_prompt(t_termcap *terminal, const char *new_prompt);
+
 
 
 typedef struct s_history_manager 
@@ -83,6 +85,7 @@ typedef struct  s_autocomplete_manager
 
 } t_autocomplete;
 
-
+char    **autocomplete(char buffer[], t_termcap *terminal, char *path_env);
+char   *cycle_targets(char buffer[], char **possible_commands, t_termcap *terminal);
 
 #endif 
