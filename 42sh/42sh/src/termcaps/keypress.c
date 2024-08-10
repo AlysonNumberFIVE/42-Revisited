@@ -67,10 +67,10 @@ void    handle_newline(t_termcap **terminal_id)
     fflush(stdout);
 }
 
-
 int handle_keypress(t_termcap *terminal_id)
 {
     ssize_t read_bytes;
+    char *temp_buffer;
     char c;
     int cursor_adjuster;
 
@@ -86,18 +86,53 @@ int handle_keypress(t_termcap *terminal_id)
         if (c == CTRL_C)
             exit(1);
             
+        if (c == CTRL_A)
+            terminal_id->cursor_position = 0;
+        else if (c == CTRL_B)
+        {
+            terminal_id->cursor_position--;
+            if (terminal_id->cursor_position < 0)
+                terminal_id->cursor_position = 0;
+        }
+        else if (c == CTRL_F)
+        {
+            terminal_id->cursor_position++;
+            if ((size_t)terminal_id->cursor_position >= strlen(history->buffer))
+                terminal_id->cursor_position = strlen(history->buffer);
+        }
+        else if (c == CTRL_E)
+            terminal_id->cursor_position = strlen(history->buffer);
+        else if (c == CTRL_D)
+        {
+            temp_buffer = delete_this_char(history->buffer ,terminal_id->cursor_position);
+            if (temp_buffer == NULL)
+                exit(1) ;
+      
+            memset(history->buffer, 0, strlen(history->buffer));
+            memcpy(history->buffer, temp_buffer, strlen(temp_buffer));
+            free_and_null(&temp_buffer);
+        }
+        else if (c == CTRL_K)
+        {       
+            temp_buffer = delete_to_end_of_line(history->buffer ,terminal_id->cursor_position);
+            if (temp_buffer == NULL)
+                continue ;
+            memset(history->buffer, 0, strlen(history->buffer));
+            memcpy(history->buffer, temp_buffer, strlen(temp_buffer));
+            free_and_null(&temp_buffer);     
+        }
         else if (c == TAB) 
         {   
-     
             if (possible_commands != NULL && strcmp(history->buffer, current) == 0)
             {
-                if (command_list >= arraylen(possible_commands) - 1)
+                if (command_list >= arraylen(possible_commands))
                     command_list = 0;
                 
                 memset(history->buffer, 0, strlen(history->buffer));
                 memcpy(history->buffer, possible_commands[command_list], strlen(possible_commands[command_list]));
                 terminal_id->cursor_position = strlen(history->buffer);
                 command_list++;
+                free(current);
                 current = strdup(history->buffer);
             }
             else
@@ -114,7 +149,7 @@ int handle_keypress(t_termcap *terminal_id)
         {
             if (possible_commands != NULL)
             {
-                clear_next_line();
+                clear_screen_downward();
                 free2d(possible_commands);
                 possible_commands = NULL;
             }
@@ -126,7 +161,6 @@ int handle_keypress(t_termcap *terminal_id)
             cursor_adjuster = directions();
             if (cursor_adjuster == 0)
                 continue ;
-        
             else if (cursor_adjuster == ARROW_DOWN || cursor_adjuster == ARROW_DOWN)
                 terminal_id->cursor_position = strlen(history->buffer) - 1;
             
@@ -226,8 +260,6 @@ int main(void)
         }
         else 
             termcap_manager->cursor_position = strlen(history->buffer);
-
-
     }
     return 0;
 }

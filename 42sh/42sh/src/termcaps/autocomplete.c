@@ -32,8 +32,11 @@ static char    **token_extraction(char buffer[])
         str = charpush(str, buffer[i]);
         i++;
     }
-    tokens = arraypush(tokens, str);
-    free_and_null(&str);
+    if (str != NULL)
+    {
+        tokens = arraypush(tokens, str);
+        free_and_null(&str);
+    }
     return tokens;
 }
 
@@ -166,7 +169,12 @@ char    **autocomplete(char buffer[], t_termcap *terminal, char *path_env)
     char **possible_commands;
 
     i = 0;
+
     tokens = token_extraction(buffer);
+    if (tokens == NULL)
+    {
+        return NULL;
+    }
     possible_commands = NULL;
     if (is_first_word(buffer, terminal->cursor_position))
     {
@@ -181,11 +189,10 @@ char    **autocomplete(char buffer[], t_termcap *terminal, char *path_env)
             move_cursor(terminal, 0, terminal->cursor_row + 1);
             printf("do you wish to see all %zu possibilities?", arraylen(possible_commands));
             fflush(stdout);
-            if (are_you_sure() == true)
-                printf("\nprint_everything");
-            else   
-            {
-                clear_screen_downward();
+            if (are_you_sure() == false)
+            {           
+                free2d(possible_commands);
+                clear_current_line();
                 return NULL;
             }
         }  
@@ -205,7 +212,9 @@ char    **autocomplete(char buffer[], t_termcap *terminal, char *path_env)
             refresh_line(terminal);
             return NULL;
         }
-    } 
+    }
+
+    
     return possible_commands; 
 
 }

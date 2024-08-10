@@ -7,7 +7,7 @@
 #include <termcap.h>
 
 #define PROMPT_LENGTH 128
-#define CTRL_C 3
+
 #define ESC_SEQ 27
 
 #define NEWLINE '\r'
@@ -20,6 +20,15 @@
 #define PATH_DELIM '/'
 
 #define LOCAL_TOOLS_LENGTH 4
+
+#define CTRL_A 0x01
+#define CTRL_B 0x02
+#define CTRL_C 3
+#define CTRL_D 0x04
+#define CTRL_E 0x05
+#define CTRL_F 0x06
+
+#define CTRL_K 0x0b
 
 
 typedef struct  s_termcap_manager 
@@ -87,5 +96,12 @@ typedef struct  s_autocomplete_manager
 
 char    **autocomplete(char buffer[], t_termcap *terminal, char *path_env);
 char   *cycle_targets(char buffer[], char **possible_commands, t_termcap *terminal);
+
+
+// Misc
+
+char    *delete_this_char(char buffer[], int cursor_position);
+char    *delete_to_end_of_line(char buffer[], int cursor_position);
+
 
 #endif 
