@@ -4,6 +4,7 @@
 
 char **possible_commands = NULL;
 size_t command_list = 0;
+int saved_cursor_pos = 0;
 char *current = NULL;
 t_history *history;
 
@@ -67,6 +68,7 @@ void    handle_newline(t_termcap **terminal_id)
     fflush(stdout);
 }
 
+
 int handle_keypress(t_termcap *terminal_id)
 {
     ssize_t read_bytes;
@@ -107,7 +109,7 @@ int handle_keypress(t_termcap *terminal_id)
             temp_buffer = delete_this_char(history->buffer ,terminal_id->cursor_position);
             if (temp_buffer == NULL)
                 exit(1) ;
-      
+
             memset(history->buffer, 0, strlen(history->buffer));
             memcpy(history->buffer, temp_buffer, strlen(temp_buffer));
             free_and_null(&temp_buffer);
@@ -117,19 +119,23 @@ int handle_keypress(t_termcap *terminal_id)
             temp_buffer = delete_to_end_of_line(history->buffer ,terminal_id->cursor_position);
             if (temp_buffer == NULL)
                 continue ;
+
             memset(history->buffer, 0, strlen(history->buffer));
             memcpy(history->buffer, temp_buffer, strlen(temp_buffer));
             free_and_null(&temp_buffer);     
         }
         else if (c == TAB) 
-        {   
+        {
+
             if (possible_commands != NULL && strcmp(history->buffer, current) == 0)
             {
+
                 if (command_list >= arraylen(possible_commands))
                     command_list = 0;
-                
+
+
                 memset(history->buffer, 0, strlen(history->buffer));
-                memcpy(history->buffer, possible_commands[command_list], strlen(possible_commands[command_list]));
+                memcpy(history->buffer,  possible_commands[command_list],  strlen(possible_commands[command_list]));
                 terminal_id->cursor_position = strlen(history->buffer);
                 command_list++;
                 free(current);
@@ -137,11 +143,17 @@ int handle_keypress(t_termcap *terminal_id)
             }
             else
             {
+             
                 clear_screen_downward();
+                if (possible_commands != NULL)
+                    free2d(possible_commands);
+
                 // TODO: Move this string to PATH in the env
                 possible_commands = autocomplete(history->buffer, terminal_id, 
                     "/Users/alysonngonyama/anaconda3/bin:/Users/alysonngonyama/anaconda3/condabin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
                 );
+                if (current != NULL)
+                    free(current);
                 current = strdup(history->buffer);
             }
         }
@@ -190,6 +202,7 @@ int handle_keypress(t_termcap *terminal_id)
         }
         refresh_line(terminal_id);
     }
+
     return 0;
 }
 
