@@ -3,6 +3,7 @@
 
 
 char **possible_commands = NULL;
+t_autocomm_str *possible_comms = NULL;
 size_t command_list = 0;
 int saved_cursor_pos = 0;
 char *current = NULL;
@@ -126,13 +127,10 @@ int handle_keypress(t_termcap *terminal_id)
         }
         else if (c == TAB) 
         {
-
             if (possible_commands != NULL && strcmp(history->buffer, current) == 0)
             {
-
                 if (command_list >= arraylen(possible_commands))
                     command_list = 0;
-
 
                 memset(history->buffer, 0, strlen(history->buffer));
                 memcpy(history->buffer,  possible_commands[command_list],  strlen(possible_commands[command_list]));
@@ -143,7 +141,6 @@ int handle_keypress(t_termcap *terminal_id)
             }
             else
             {
-             
                 clear_screen_downward();
                 if (possible_commands != NULL)
                     free2d(possible_commands);
@@ -159,7 +156,7 @@ int handle_keypress(t_termcap *terminal_id)
         }
         else if (c == NEWLINE)
         {
-            if (possible_commands != NULL)
+            if (possible_commands != NULL)  
             {
                 clear_screen_downward();
                 free2d(possible_commands);

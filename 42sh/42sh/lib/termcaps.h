@@ -103,5 +103,27 @@ char   *cycle_targets(char buffer[], char **possible_commands, t_termcap *termin
 char    *delete_this_char(char buffer[], int cursor_position);
 char    *delete_to_end_of_line(char buffer[], int cursor_position);
 
+typedef struct s_input_tokens 
+{
+    char *token;
+    int start_position;
+    int end_position;
+
+    struct s_input_tokens *next;
+    struct s_input_tokens *prev;
+}   t_token_position;
+
+typedef struct s_autocomm_string 
+{
+    char *buffer;
+    int cursor_position;
+
+    struct s_autocomm_string *next;
+}   t_autocomm_str;
+
+char    *extract_word_at_position(char *str, int position);
+char    *replace_word_at_position(char *str, int position, char *replacement);
+void    push_command(t_autocomm_str **head, char *string, int position);
+void    free_commands(t_autocomm_str *head);
 
 #endif 
